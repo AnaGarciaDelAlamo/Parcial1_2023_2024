@@ -34,7 +34,7 @@ public class CampanasDeGaussFactory {
                 System.out.println("Componente producido: " + component);
                 componentsProduced++;
             } catch (InterruptedException e) {
-                e.printStackTrace();
+                Thread.currentThread().interrupt();
             }
         }
 
