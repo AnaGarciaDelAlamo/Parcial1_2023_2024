@@ -18,22 +18,29 @@ public class CampanasDeGaussFactory {
         frame.setVisible(true);
 
         List<Integer> frequencyData = new ArrayList<>();
+        int numWorkers = 4; // Número de trabajadores (hilos) para la producción
+        int maxComponents = 1000; // Número total de componentes a producir
+        int componentsPerWorker = maxComponents / numWorkers;
 
-        // Crear e iniciar trabajadores
-        for (int i = 0; i < 1000; i++) {
-            // Simular la producción de un componente
-            int component = (int) (Math.random() * 10); // Valores entre 0 y 9
-            frequencyData.add(component);
+        List<Thread> workerThreads = new ArrayList<>();
+        for (int i = 0; i < numWorkers; i++) {
+            Worker workerRunnable = new Worker(componentsPerWorker, frequencyData, distributionPanel);
+            Thread workerThread = new Thread(workerRunnable);
+            workerThreads.add(workerThread);
+        }
 
-            // Actualizar el panel de distribución
-            distributionPanel.setFrequencyData(frequencyData);
-            distributionPanel.repaint();
+        // Iniciar los hilos de los trabajadores
+        for (Thread workerThread : workerThreads) {
+            workerThread.start();
+        }
 
-            try {
-                Thread.sleep(100);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
+        // Esperar a que todos los hilos de los trabajadores terminen
+        try {
+            for (Thread workerThread : workerThreads) {
+                workerThread.join();
             }
+        } catch (InterruptedException e) {
+            e.printStackTrace();
         }
 
         System.out.println("Todos los componentes han sido producidos");
