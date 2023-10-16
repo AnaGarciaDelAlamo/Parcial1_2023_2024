@@ -1,49 +1,52 @@
 package org.example;
 
+import javax.swing.*;
+import java.awt.*;
+import java.util.List;
+import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
 public class CampanasDeGaussFactory {
+    private static final int numWorkers = 4;
+    private static final int bufferSize = 100;
+    private static final int numBalls = 1000;
+
     public static void main(String[] args) {
-        int numWorkers = 4;
-        int bufferSize = 10;
-        int maxComponents = 10;
-        int componentsPerWorker = maxComponents / numWorkers;
-
-        // Búfer compartido para los componentes producidos
         BlockingQueue<Component> buffer = new ArrayBlockingQueue<>(bufferSize);
+        List<Component> componentList = new ArrayList<>(numBalls);
 
-        // Crear instancias de Runnable para trabajadores y ensamblador
-        Runnable[] runnables = new Runnable[numWorkers + 1];
+        JFrame frame = new JFrame("Campanas de Gauss Factory");
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setLayout(new BorderLayout());
+
+        JTextArea textArea = new JTextArea();
+        frame.add(new JScrollPane(textArea), BorderLayout.CENTER);
+
         for (int i = 0; i < numWorkers; i++) {
-            runnables[i] = new Worker("Worker " + i, buffer, componentsPerWorker);
-        }
-        runnables[numWorkers] = new Assembler(buffer);
-
-        Thread[] threads = new Thread[runnables.length];
-        for (int i = 0; i < runnables.length; i++) {
-            threads[i] = new Thread(runnables[i]);
-            threads[i].start();
+            Thread workerThread = new Thread(new Worker("Worker " + i, buffer, numBalls / numWorkers));
+            workerThread.start();
         }
 
-        // Imprimir los componentes a medida que se producen
-        int componentsProduced = 0;
-        while (componentsProduced < maxComponents) {
+        Thread assemblerThread = new Thread(new Assembler(buffer));
+        assemblerThread.start();
+
+        frame.setSize(800, 600);
+        frame.setVisible(true);
+
+        while (componentList.size() < numBalls) {
             try {
                 Component component = buffer.take();
-                System.out.println("Componente producido: " + component);
-                componentsProduced++;
+                componentList.add(component);
+                textArea.append("Componente producido: " + component + "\n");
+                textArea.setCaretPosition(textArea.getDocument().getLength());
             } catch (InterruptedException e) {
                 Thread.currentThread().interrupt();
             }
         }
-
-        // Finalizar los hilos
-        for (Thread thread : threads) {
-            thread.interrupt();
-        }
-
         System.out.println("Todos los componentes han sido producidos");
     }
 }
+
+
 
