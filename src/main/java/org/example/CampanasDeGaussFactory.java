@@ -3,9 +3,6 @@ package org.example;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
-import java.util.concurrent.ArrayBlockingQueue;
-import java.util.concurrent.BlockingQueue;
-
 public class CampanasDeGaussFactory {
     public static void main(String[] args) {
         int numWorkers = 4;
@@ -29,19 +26,24 @@ public class CampanasDeGaussFactory {
             threads[i].start();
         }
 
-        try {
-            for (Thread thread : threads) {
-                thread.join();
+        // Imprimir los componentes a medida que se producen
+        int componentsProduced = 0;
+        while (componentsProduced < maxComponents) {
+            try {
+                Component component = buffer.take();
+                System.out.println("Componente producido: " + component);
+                componentsProduced++;
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
-        System.out.println("Todos los hilos han terminado");
-
-        // Imprimir los componentes producidos
-        for (Component component : buffer) {
-            System.out.println(component);
+        // Finalizar los hilos
+        for (Thread thread : threads) {
+            thread.interrupt();
         }
+
+        System.out.println("Todos los componentes han sido producidos");
     }
 }
+
