@@ -4,7 +4,7 @@ public class Component {
     private int id;
     private String description;
 
-    public Component() {
+    public Component(int component) {
     }
 
     public Component(int id, String description) {

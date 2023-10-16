@@ -31,4 +31,3 @@ class Worker implements Runnable {
         }
     }
 }
-
