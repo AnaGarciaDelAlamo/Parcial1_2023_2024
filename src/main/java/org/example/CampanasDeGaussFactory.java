@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 
+
 public class CampanasDeGaussFactory {
     public static void main(String[] args) {
         JFrame frame = new JFrame("Campanas de Gauss Factory");
@@ -18,29 +19,22 @@ public class CampanasDeGaussFactory {
         frame.setVisible(true);
 
         List<Integer> frequencyData = new ArrayList<>();
-        int numWorkers = 4; // Número de trabajadores (hilos) para la producción
-        int maxComponents = 1000; // Número total de componentes a producir
-        int componentsPerWorker = maxComponents / numWorkers;
 
-        List<Thread> workerThreads = new ArrayList<>();
-        for (int i = 0; i < numWorkers; i++) {
-            Worker workerRunnable = new Worker(componentsPerWorker, frequencyData, distributionPanel);
-            Thread workerThread = new Thread(workerRunnable);
-            workerThreads.add(workerThread);
-        }
+        // Crear e iniciar trabajadores
+        List<Worker> workers = new ArrayList<>();
+        for (int i = 0; i < 1000; i++) {
+            int component = (int) (Math.random() * 10); // Valores entre 0 y 9
+            frequencyData.add(component);
 
-        // Iniciar los hilos de los trabajadores
-        for (Thread workerThread : workerThreads) {
-            workerThread.start();
-        }
+            // Actualizar el panel de distribución
+            distributionPanel.setFrequencyData(frequencyData);
+            distributionPanel.repaint();
 
-        // Esperar a que todos los hilos de los trabajadores terminen
-        try {
-            for (Thread workerThread : workerThreads) {
-                workerThread.join();
+            try {
+                Thread.sleep(100);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
             }
-        } catch (InterruptedException e) {
-            e.printStackTrace();
         }
 
         System.out.println("Todos los componentes han sido producidos");
